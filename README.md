@@ -8,6 +8,8 @@ A production-quality task management REST API built in Go for the Zomato backend
 
 TaskFlow is a REST API for managing collaborative projects and tasks with JWT-based authentication. Users can register, log in, create projects, add tasks to those projects, and assign tasks to other users.
 
+For assignment review convenience, Docker Compose is configured so a fresh clone can run with a single `docker compose up` command even without a `.env` file. A local fallback `JWT_SECRET` is provided for this bootstrap path; production deployments must override it with a strong, unique secret.
+
 This is a backend-only codebase. A Postman collection is included for manual testing of all endpoints.
 
 ### Features

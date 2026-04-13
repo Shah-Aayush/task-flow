@@ -4,12 +4,34 @@
 
 **Prerequisites:** Docker and Docker Compose.
 
+### Zero-Manual-Step Startup (Reviewer Path)
+
+To satisfy the assignment requirement that a fresh clone should boot with a single command,
+`docker-compose.yml` includes defaults for required environment variables, including
+`JWT_SECRET`.
+
+This means the project can start even when no `.env` file exists:
+
+```bash
+git clone https://github.com/Shah-Aayush/task-flow.git
+cd task-flow
+docker compose up
+```
+
+Why this exists:
+- The assignment explicitly expects `docker compose up` to work with zero manual setup.
+- A missing `.env` should not block reviewers from running the project.
+
+Production note:
+- The compose fallback secret is only for local/dev convenience.
+- In real deployments, always provide a strong, unique `JWT_SECRET` through environment configuration.
+
 ```bash
 # 1. Clone the repository
 git clone https://github.com/Shah-Aayush/task-flow.git
 cd task-flow
 
-# 2. Configure environment
+# 2. Optional: configure environment
 cp .env.example .env
 # Edit .env to change DB credentials or JWT secret if needed
 
