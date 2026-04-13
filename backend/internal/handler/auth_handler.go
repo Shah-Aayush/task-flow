@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 
-	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/service"
-	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/validator"
+	"github.com/Shah-Aayush/task-flow/backend/internal/service"
+	"github.com/Shah-Aayush/task-flow/backend/internal/validator"
 )
 
 // AuthHandler handles HTTP requests for authentication endpoints.

@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/domain"
-	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/handler/middleware"
-	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/repository"
-	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/service"
-	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/validator"
+	"github.com/Shah-Aayush/task-flow/backend/internal/domain"
+	"github.com/Shah-Aayush/task-flow/backend/internal/handler/middleware"
+	"github.com/Shah-Aayush/task-flow/backend/internal/repository"
+	"github.com/Shah-Aayush/task-flow/backend/internal/service"
+	"github.com/Shah-Aayush/task-flow/backend/internal/validator"
 	"github.com/google/uuid"
 )
 

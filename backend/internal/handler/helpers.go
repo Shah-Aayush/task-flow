@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/repository"
+	"github.com/Shah-Aayush/task-flow/backend/internal/repository"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )

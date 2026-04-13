@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/domain"
+	"github.com/Shah-Aayush/task-flow/backend/internal/domain"
 	"github.com/google/uuid"
 )
 

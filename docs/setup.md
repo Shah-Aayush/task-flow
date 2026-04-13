@@ -6,8 +6,8 @@
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/Shah-Aayush/task-flow-zomato-takehome.git
-cd taskflow-zomato-takehome
+git clone https://github.com/Shah-Aayush/task-flow.git
+cd task-flow
 
 # 2. Configure environment
 cp .env.example .env

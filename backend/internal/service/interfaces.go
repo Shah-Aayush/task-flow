@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 
-	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/domain"
-	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/repository"
+	"github.com/Shah-Aayush/task-flow/backend/internal/domain"
+	"github.com/Shah-Aayush/task-flow/backend/internal/repository"
 	"github.com/google/uuid"
 )
 

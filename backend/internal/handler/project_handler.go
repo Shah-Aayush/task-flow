@@ -3,9 +3,9 @@ package handler
 import (
 	"net/http"
 
-	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/handler/middleware"
-	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/service"
-	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/validator"
+	"github.com/Shah-Aayush/task-flow/backend/internal/handler/middleware"
+	"github.com/Shah-Aayush/task-flow/backend/internal/service"
+	"github.com/Shah-Aayush/task-flow/backend/internal/validator"
 )
 
 // ProjectHandler handles HTTP requests for project endpoints.

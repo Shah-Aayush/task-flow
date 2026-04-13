@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	jwtpkg "github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/auth"
+	jwtpkg "github.com/Shah-Aayush/task-flow/backend/internal/auth"
 	"github.com/google/uuid"
 )
 

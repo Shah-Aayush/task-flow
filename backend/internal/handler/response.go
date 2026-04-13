@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/domain"
+	"github.com/Shah-Aayush/task-flow/backend/internal/domain"
 )
 
 // errorResponse matches the spec format for error responses.
