@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/aayushshah/taskflow/internal/domain"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/domain"
 	"github.com/go-playground/validator/v10"
 )
 

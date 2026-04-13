@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/aayushshah/taskflow/internal/domain"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/domain"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"

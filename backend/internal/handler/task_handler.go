@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/aayushshah/taskflow/internal/domain"
-	"github.com/aayushshah/taskflow/internal/handler/middleware"
-	"github.com/aayushshah/taskflow/internal/repository"
-	"github.com/aayushshah/taskflow/internal/service"
-	"github.com/aayushshah/taskflow/internal/validator"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/domain"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/handler/middleware"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/repository"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/service"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/validator"
 	"github.com/google/uuid"
 )
 
@@ -48,12 +48,12 @@ type updateTaskRequest struct {
 
 // rawUpdateTaskRequest is used for JSON decoding to detect explicit null values.
 type rawUpdateTaskRequest struct {
-	Title       *string          `json:"title"`
-	Description *string          `json:"description"`
-	Status      *string          `json:"status"`
-	Priority    *string          `json:"priority"`
-	AssigneeID  *json.RawMessage `json:"assignee_id"`
-	DueDate     *json.RawMessage `json:"due_date"`
+	Title       *string         `json:"title"`
+	Description *string         `json:"description"`
+	Status      *string         `json:"status"`
+	Priority    *string         `json:"priority"`
+	AssigneeID  json.RawMessage `json:"assignee_id"`
+	DueDate     json.RawMessage `json:"due_date"`
 }
 
 // ListByProject handles GET /projects/:id/tasks with optional ?status= and ?assignee= filters.
@@ -110,7 +110,7 @@ func (h *TaskHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req createTaskRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		JSON(w, http.StatusBadRequest, map[string]string{"error": "invalid request body"})
 		return
 	}
@@ -162,7 +162,7 @@ func (h *TaskHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	// Use raw message decoding to detect explicit null for assignee_id and due_date
 	var raw rawUpdateTaskRequest
-	if err := json.NewDecoder(r.Body).Decode(&raw); err != nil {
+	if err := decodeJSONStrict(r, &raw); err != nil {
 		JSON(w, http.StatusBadRequest, map[string]string{"error": "invalid request body"})
 		return
 	}
@@ -186,7 +186,7 @@ func (h *TaskHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	// Handle assignee_id: explicit JSON null → clear, UUID string → set, absent → no change
 	if raw.AssigneeID != nil {
-		rawVal := string(*raw.AssigneeID)
+		rawVal := string(raw.AssigneeID)
 		if rawVal == "null" {
 			fields.ClearAssignee = true
 		} else {
@@ -206,7 +206,7 @@ func (h *TaskHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	// Handle due_date: explicit null → clear, date string → set
 	if raw.DueDate != nil {
-		rawVal := string(*raw.DueDate)
+		rawVal := string(raw.DueDate)
 		if rawVal == "null" {
 			fields.ClearDueDate = true
 		} else {
@@ -272,6 +272,3 @@ func (h *TaskHandler) GetStats(w http.ResponseWriter, r *http.Request) {
 
 	JSON(w, http.StatusOK, stats)
 }
-
-
-

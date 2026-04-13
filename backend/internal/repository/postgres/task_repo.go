@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aayushshah/taskflow/internal/domain"
-	"github.com/aayushshah/taskflow/internal/repository"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/domain"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/repository"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"

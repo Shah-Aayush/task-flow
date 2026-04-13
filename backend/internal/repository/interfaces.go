@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"github.com/aayushshah/taskflow/internal/domain"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/domain"
 	"github.com/google/uuid"
 )
 
@@ -42,6 +42,10 @@ type ProjectRepository interface {
 	// ListByUser returns projects where the user is owner OR has tasks assigned to them.
 	ListByUser(ctx context.Context, userID uuid.UUID, p Pagination) ([]domain.Project, int, error)
 	Create(ctx context.Context, project *domain.Project) error
+	// Exists returns true when a project with the given ID exists.
+	Exists(ctx context.Context, id uuid.UUID) (bool, error)
+	// HasAccess returns true when user can access the project (owner or assignee in project tasks).
+	HasAccess(ctx context.Context, userID, projectID uuid.UUID) (bool, error)
 	// GetByID returns the project with its tasks populated.
 	GetByID(ctx context.Context, id uuid.UUID) (*domain.Project, error)
 	Update(ctx context.Context, project *domain.Project) error

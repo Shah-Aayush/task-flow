@@ -1,4 +1,4 @@
-module github.com/aayushshah/taskflow
+module github.com/Shah-Aayush/task-flow-zomato-takehome/backend
 
 go 1.23
 

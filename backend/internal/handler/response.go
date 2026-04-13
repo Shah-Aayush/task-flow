@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/aayushshah/taskflow/internal/domain"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/domain"
 )
 
 // errorResponse matches the spec format for error responses.
@@ -45,7 +45,7 @@ func Error(w http.ResponseWriter, err error) {
 	case errors.Is(err, domain.ErrUnauthorized):
 		JSON(w, http.StatusUnauthorized, errorResponse{Error: "unauthorized"})
 	case errors.Is(err, domain.ErrConflict):
-		JSON(w, http.StatusConflict, errorResponse{Error: "conflict: resource already exists"})
+		JSON(w, http.StatusConflict, errorResponse{Error: "conflict"})
 	default:
 		JSON(w, http.StatusInternalServerError, errorResponse{Error: "internal server error"})
 	}

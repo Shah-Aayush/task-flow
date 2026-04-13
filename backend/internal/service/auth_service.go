@@ -5,9 +5,9 @@ import (
 	"errors"
 	"time"
 
-	jwtpkg "github.com/aayushshah/taskflow/internal/auth"
-	"github.com/aayushshah/taskflow/internal/domain"
-	"github.com/aayushshah/taskflow/internal/repository"
+	jwtpkg "github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/auth"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/domain"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/repository"
 	"github.com/google/uuid"
 )
 

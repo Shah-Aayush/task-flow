@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/aayushshah/taskflow/internal/domain"
-	"github.com/aayushshah/taskflow/internal/repository"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/domain"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/repository"
 	"github.com/google/uuid"
 )
 
@@ -38,8 +38,7 @@ func (s *TaskServiceImpl) ListByProject(
 	filters repository.TaskFilters,
 	p repository.Pagination,
 ) (*domain.TaskListResponse, error) {
-	// Verify project exists
-	if _, err := s.projectRepo.GetByID(ctx, projectID); err != nil {
+	if err := s.ensureProjectAccess(ctx, userID, projectID); err != nil {
 		return nil, err
 	}
 
@@ -63,8 +62,7 @@ func (s *TaskServiceImpl) ListByProject(
 //  3. creator_id is always set to the authenticated user
 //  4. Default status: todo, priority defaults come from the request
 func (s *TaskServiceImpl) Create(ctx context.Context, userID uuid.UUID, projectID uuid.UUID, input CreateTaskInput) (*domain.Task, error) {
-	// Verify project exists
-	if _, err := s.projectRepo.GetByID(ctx, projectID); err != nil {
+	if err := s.ensureProjectAccess(ctx, userID, projectID); err != nil {
 		return nil, err
 	}
 
@@ -125,9 +123,22 @@ func (s *TaskServiceImpl) Create(ctx context.Context, userID uuid.UUID, projectI
 //  3. If priority is provided, it must be a valid enum value
 //  4. If assignee_id is provided (non-nil, non-clear), the assignee must exist
 func (s *TaskServiceImpl) Update(ctx context.Context, userID uuid.UUID, taskID uuid.UUID, fields domain.UpdateTaskFields) (*domain.Task, error) {
-	// Verify task exists
-	if _, err := s.taskRepo.GetByID(ctx, taskID); err != nil {
+	task, err := s.taskRepo.GetByID(ctx, taskID)
+	if err != nil {
 		return nil, err
+	}
+
+	// Authorization check for updates:
+	// project owner, task creator, or current assignee may update.
+	isAssignee := task.AssigneeID != nil && *task.AssigneeID == userID
+	if task.CreatorID != userID && !isAssignee {
+		proj, err := s.projectRepo.GetByID(ctx, task.ProjectID)
+		if err != nil {
+			return nil, err
+		}
+		if proj.OwnerID != userID {
+			return nil, domain.ErrForbidden
+		}
 	}
 
 	// Validate enum values
@@ -191,11 +202,28 @@ func (s *TaskServiceImpl) Delete(ctx context.Context, userID uuid.UUID, taskID u
 
 // GetStats returns aggregated task statistics for a project.
 func (s *TaskServiceImpl) GetStats(ctx context.Context, userID uuid.UUID, projectID uuid.UUID) (*domain.TaskStats, error) {
-	// Verify project exists
-	if _, err := s.projectRepo.GetByID(ctx, projectID); err != nil {
+	if err := s.ensureProjectAccess(ctx, userID, projectID); err != nil {
 		return nil, err
 	}
 	return s.taskRepo.GetStats(ctx, projectID)
 }
 
+func (s *TaskServiceImpl) ensureProjectAccess(ctx context.Context, userID uuid.UUID, projectID uuid.UUID) error {
+	exists, err := s.projectRepo.Exists(ctx, projectID)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return domain.ErrNotFound
+	}
 
+	hasAccess, err := s.projectRepo.HasAccess(ctx, userID, projectID)
+	if err != nil {
+		return err
+	}
+	if !hasAccess {
+		return domain.ErrForbidden
+	}
+
+	return nil
+}

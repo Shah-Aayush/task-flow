@@ -1,13 +1,11 @@
 package handler
 
 import (
-	"encoding/json"
 	"net/http"
 
-	"github.com/aayushshah/taskflow/internal/handler/middleware"
-	"github.com/aayushshah/taskflow/internal/service"
-	"github.com/aayushshah/taskflow/internal/validator"
-	"github.com/google/uuid"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/handler/middleware"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/service"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/validator"
 )
 
 // ProjectHandler handles HTTP requests for project endpoints.
@@ -59,7 +57,7 @@ func (h *ProjectHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req createProjectRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		JSON(w, http.StatusBadRequest, map[string]string{"error": "invalid request body"})
 		return
 	}
@@ -112,7 +110,7 @@ func (h *ProjectHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req updateProjectRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONStrict(r, &req); err != nil {
 		JSON(w, http.StatusBadRequest, map[string]string{"error": "invalid request body"})
 		return
 	}
@@ -145,4 +143,3 @@ func (h *ProjectHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	NoContent(w)
 }
-

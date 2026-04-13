@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/aayushshah/taskflow/internal/domain"
-	"github.com/aayushshah/taskflow/internal/repository"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/domain"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/repository"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -84,6 +84,29 @@ func (r *ProjectRepository) Create(ctx context.Context, project *domain.Project)
 		project.ID, project.Name, project.Description, project.OwnerID, project.CreatedAt,
 	)
 	return err
+}
+
+// Exists returns true when a project with the given ID exists.
+func (r *ProjectRepository) Exists(ctx context.Context, id uuid.UUID) (bool, error) {
+	query := `SELECT EXISTS(SELECT 1 FROM projects WHERE id = $1)`
+	var exists bool
+	err := r.db.QueryRow(ctx, query, id).Scan(&exists)
+	return exists, err
+}
+
+// HasAccess returns true if user owns the project or is assigned to any task in it.
+func (r *ProjectRepository) HasAccess(ctx context.Context, userID, projectID uuid.UUID) (bool, error) {
+	query := `
+		SELECT EXISTS(
+			SELECT 1
+			FROM projects p
+			LEFT JOIN tasks t ON t.project_id = p.id AND t.assignee_id = $1
+			WHERE p.id = $2 AND (p.owner_id = $1 OR t.id IS NOT NULL)
+		)
+	`
+	var allowed bool
+	err := r.db.QueryRow(ctx, query, userID, projectID).Scan(&allowed)
+	return allowed, err
 }
 
 // GetByID returns a project with its tasks populated (for GET /projects/:id).

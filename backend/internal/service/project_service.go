@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/aayushshah/taskflow/internal/domain"
-	"github.com/aayushshah/taskflow/internal/repository"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/domain"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/repository"
 	"github.com/google/uuid"
 )
 
@@ -53,6 +53,9 @@ func (s *ProjectServiceImpl) Create(ctx context.Context, userID uuid.UUID, name,
 // Access is not restricted — any authenticated user can view a project they have
 // access to (are owner or assignee). The list endpoint handles access filtering.
 func (s *ProjectServiceImpl) GetByID(ctx context.Context, userID uuid.UUID, projectID uuid.UUID) (*domain.Project, error) {
+	if err := s.ensureProjectAccess(ctx, userID, projectID); err != nil {
+		return nil, err
+	}
 	return s.projectRepo.GetByID(ctx, projectID)
 }
 
@@ -102,4 +105,24 @@ func (s *ProjectServiceImpl) Delete(ctx context.Context, userID uuid.UUID, proje
 	}
 
 	return s.projectRepo.Delete(ctx, projectID)
+}
+
+func (s *ProjectServiceImpl) ensureProjectAccess(ctx context.Context, userID uuid.UUID, projectID uuid.UUID) error {
+	exists, err := s.projectRepo.Exists(ctx, projectID)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return domain.ErrNotFound
+	}
+
+	hasAccess, err := s.projectRepo.HasAccess(ctx, userID, projectID)
+	if err != nil {
+		return err
+	}
+	if !hasAccess {
+		return domain.ErrForbidden
+	}
+
+	return nil
 }

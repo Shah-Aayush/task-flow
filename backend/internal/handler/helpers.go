@@ -1,13 +1,28 @@
 package handler
 
 import (
+	"encoding/json"
+	"io"
 	"net/http"
 	"strconv"
 
-	"github.com/aayushshah/taskflow/internal/repository"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/repository"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
+
+// decodeJSONStrict decodes exactly one JSON object and rejects unknown fields.
+func decodeJSONStrict(r *http.Request, dst interface{}) error {
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(dst); err != nil {
+		return err
+	}
+	if err := dec.Decode(&struct{}{}); err != io.EOF {
+		return err
+	}
+	return nil
+}
 
 // parseUUID extracts and parses a UUID path parameter from the chi router context.
 // On failure, it writes a 400 response and returns a non-nil error so the caller

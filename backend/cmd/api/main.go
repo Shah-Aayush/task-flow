@@ -10,13 +10,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/aayushshah/taskflow/internal/config"
-	"github.com/aayushshah/taskflow/internal/handler"
-	"github.com/aayushshah/taskflow/internal/handler/middleware"
-	embedMigrations "github.com/aayushshah/taskflow/internal/migrations"
-	repoPostgres "github.com/aayushshah/taskflow/internal/repository/postgres"
-	"github.com/aayushshah/taskflow/internal/service"
-	"github.com/aayushshah/taskflow/internal/validator"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/config"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/handler"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/handler/middleware"
+	embedMigrations "github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/migrations"
+	repoPostgres "github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/repository/postgres"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/service"
+	"github.com/Shah-Aayush/task-flow-zomato-takehome/backend/internal/validator"
 	"github.com/go-chi/chi/v5"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/golang-migrate/migrate/v4"
@@ -95,10 +95,10 @@ func main() {
 	r := chi.NewRouter()
 
 	// Global middleware stack (applied to all routes)
-	r.Use(chiMiddleware.Recoverer)          // recover from panics, return 500
-	r.Use(chiMiddleware.RequestID)          // inject X-Request-ID for tracing
-	r.Use(chiMiddleware.RealIP)             // use X-Forwarded-For if behind proxy
-	r.Use(middleware.Logger(logger))        // structured request logging
+	r.Use(chiMiddleware.Recoverer)   // recover from panics, return 500
+	r.Use(chiMiddleware.RequestID)   // inject X-Request-ID for tracing
+	r.Use(chiMiddleware.RealIP)      // use X-Forwarded-For if behind proxy
+	r.Use(middleware.Logger(logger)) // structured request logging
 
 	// Health check (no auth required)
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -223,11 +223,12 @@ func runMigrations(dbURL string, logger *slog.Logger) error {
 		return err
 	}
 
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		return err
+	upErr := m.Up()
+	if upErr != nil && upErr != migrate.ErrNoChange {
+		return upErr
 	}
 
-	if err == migrate.ErrNoChange {
+	if upErr == migrate.ErrNoChange {
 		logger.Info("migrations: no changes to apply")
 	}
 
