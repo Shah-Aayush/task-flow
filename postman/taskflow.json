@@ -1,0 +1,333 @@
+{
+  "info": {
+    "name": "TaskFlow API",
+    "description": "TaskFlow REST API collection for Zomato take-home assignment.\n\nSetup:\n1. Import this collection into Postman\n2. Create an environment with variable `BASE_URL` = `http://localhost:8080`\n3. The `TOKEN` variable is set automatically after login/register\n4. Run requests in the numbered order for the happy-path flow",
+    "_postman_id": "taskflow-collection-v1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "TOKEN",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{TOKEN}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "1. Health Check",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/health",
+            "description": "Verify the API is running"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "2. Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const body = pm.response.json();",
+                  "    pm.collectionVariables.set('TOKEN', body.token);",
+                  "    console.log('Token set from register response');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "url": "{{BASE_URL}}/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alice Johnson\",\n  \"email\": \"alice@example.com\",\n  \"password\": \"securepassword123\"\n}"
+            },
+            "description": "Register a new user. Returns JWT token + user object (no password). Status: 201."
+          }
+        },
+        {
+          "name": "3. Login (Seed User)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const body = pm.response.json();",
+                  "    pm.collectionVariables.set('TOKEN', body.token);",
+                  "    console.log('Token set from login response');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "url": "{{BASE_URL}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "description": "Login with seed user credentials. Returns JWT token. Status: 200."
+          }
+        },
+        {
+          "name": "Auth Error - Missing Email (expect 400)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{BASE_URL}}/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test\",\n  \"password\": \"password123\"\n}"
+            },
+            "description": "Expect 400 with {\"error\":\"validation failed\",\"fields\":{\"email\":\"is required\"}}"
+          }
+        },
+        {
+          "name": "Auth Error - No Token (expect 401)",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "GET",
+            "url": "{{BASE_URL}}/projects",
+            "description": "Expect 401 with {\"error\":\"unauthorized\"}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Projects",
+      "item": [
+        {
+          "name": "4. List Projects",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/projects?page=1&limit=20",
+              "host": ["{{BASE_URL}}"],
+              "path": ["projects"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "20"}
+              ]
+            },
+            "description": "List projects where user is owner or has assigned tasks. Returns paginated list."
+          }
+        },
+        {
+          "name": "5. Create Project",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const body = pm.response.json();",
+                  "    pm.collectionVariables.set('PROJECT_ID', body.id);",
+                  "    console.log('Project ID:', body.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{BASE_URL}}/projects",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My New Project\",\n  \"description\": \"A project created via Postman\"\n}"
+            },
+            "description": "Create a project. Owner is set to the authenticated user. Status: 201."
+          }
+        },
+        {
+          "name": "6. Get Project Details",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/projects/{{PROJECT_ID}}",
+            "description": "Get project with its tasks inline. Status: 200."
+          }
+        },
+        {
+          "name": "7. Update Project (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{BASE_URL}}/projects/{{PROJECT_ID}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Project Name\"\n}"
+            },
+            "description": "Partial update — only sends name. Owner only. Status: 200."
+          }
+        },
+        {
+          "name": "Project Error - Non-owner PATCH (expect 403)",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{BASE_URL}}/projects/00000000-0000-0000-0000-000000000010",
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"Hacked Name\" }"
+            },
+            "description": "Try to update seed project as non-owner. Expect 403 forbidden."
+          }
+        },
+        {
+          "name": "Project Stats (Bonus)",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/projects/{{PROJECT_ID}}/stats",
+            "description": "Bonus endpoint: task counts by status and by assignee."
+          }
+        },
+        {
+          "name": "8. Delete Project",
+          "request": {
+            "method": "DELETE",
+            "url": "{{BASE_URL}}/projects/{{PROJECT_ID}}",
+            "description": "Delete project and all its tasks. Owner only. Status: 204."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tasks",
+      "item": [
+        {
+          "name": "9. List Tasks (Seed Project)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/projects/00000000-0000-0000-0000-000000000010/tasks?page=1&limit=20",
+              "host": ["{{BASE_URL}}"],
+              "path": ["projects", "00000000-0000-0000-0000-000000000010", "tasks"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "20"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "9b. List Tasks - Filter by Status",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/projects/00000000-0000-0000-0000-000000000010/tasks?status=todo",
+              "host": ["{{BASE_URL}}"],
+              "path": ["projects", "00000000-0000-0000-0000-000000000010", "tasks"],
+              "query": [{"key": "status", "value": "todo"}]
+            }
+          }
+        },
+        {
+          "name": "9c. List Tasks - Filter by Assignee",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/projects/00000000-0000-0000-0000-000000000010/tasks?assignee=00000000-0000-0000-0000-000000000002",
+              "host": ["{{BASE_URL}}"],
+              "path": ["projects", "00000000-0000-0000-0000-000000000010", "tasks"],
+              "query": [{"key": "assignee", "value": "00000000-0000-0000-0000-000000000002"}]
+            }
+          }
+        },
+        {
+          "name": "10. Create Task",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const body = pm.response.json();",
+                  "    pm.collectionVariables.set('TASK_ID', body.id);",
+                  "    console.log('Task ID:', body.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{BASE_URL}}/projects/00000000-0000-0000-0000-000000000010/tasks",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Build the API\",\n  \"description\": \"Implement all REST endpoints\",\n  \"priority\": \"high\",\n  \"assignee_id\": \"00000000-0000-0000-0000-000000000001\",\n  \"due_date\": \"2026-05-01\"\n}"
+            },
+            "description": "Create a task in the seed project. Status defaults to 'todo'. Status: 201."
+          }
+        },
+        {
+          "name": "11. Update Task (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{BASE_URL}}/tasks/{{TASK_ID}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in_progress\",\n  \"priority\": \"medium\"\n}"
+            },
+            "description": "Partial update — only sends status and priority. updated_at is set by SQL NOW()."
+          }
+        },
+        {
+          "name": "11b. Unset Assignee (explicit null)",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{BASE_URL}}/tasks/{{TASK_ID}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assignee_id\": null\n}"
+            },
+            "description": "Sending explicit JSON null clears the assignee_id field."
+          }
+        },
+        {
+          "name": "12. Delete Task",
+          "request": {
+            "method": "DELETE",
+            "url": "{{BASE_URL}}/tasks/{{TASK_ID}}",
+            "description": "Delete task. Allowed for project owner OR task creator. Status: 204."
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: taskflow-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-taskflow}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-taskflow_secret}
+      POSTGRES_DB: ${DB_NAME:-taskflow}
+    # postgres port is intentionally not exposed to the host —
+    # the api container accesses it via the internal Docker network.
+    # To connect externally for debugging: docker compose exec postgres psql -U taskflow
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # pg_isready checks that Postgres is accepting connections.
+      # This is what allows `depends_on: condition: service_healthy` to work —
+      # the API container won't start until Postgres is truly ready.
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-taskflow} -d ${DB_NAME:-taskflow}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: taskflow-api
+    restart: unless-stopped
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-taskflow}
+      DB_PASSWORD: ${DB_PASSWORD:-taskflow_secret}
+      DB_NAME: ${DB_NAME:-taskflow}
+      DB_SSLMODE: disable
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-strong-random-secret-in-production}
+      SERVER_PORT: 8080
+      BCRYPT_COST: ${BCRYPT_COST:-12}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+    name: taskflow-pgdata
